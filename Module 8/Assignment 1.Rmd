@@ -1,0 +1,149 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+#1.1
+wiki = read.csv("wiki.csv", stringsAsFactors = FALSE)
+str(wiki)
+wiki$Vandal = as.factor(wiki$Vandal)
+table(wiki$Vandal)
+```
+
+```{r}
+#1.2
+library(tm)
+corpusAdded = Corpus(VectorSource(wiki$Added))
+corpusAdded = tm_map(corpusAdded, removeWords, stopwords("english"))
+corpusAdded = tm_map(corpusAdded, stemDocument)
+dtmAdded = DocumentTermMatrix(corpusAdded)
+dtmAdded
+```
+
+```{r}
+#1.3
+sparseAdded = removeSparseTerms(dtmAdded, 0.997)
+sparseAdded
+```
+
+```{r}
+#1.4
+wordsAdded = as.data.frame(as.matrix(sparseAdded))
+colnames(wordsAdded) = paste("A", colnames(wordsAdded))
+
+
+corpusRemoved = Corpus(VectorSource(wiki$Removed))
+corpusRemoved = tm_map(corpusRemoved, removeWords, stopwords("english"))
+corpusRemoved = tm_map(corpusRemoved, stemDocument)
+dtmRemoved = DocumentTermMatrix(corpusRemoved)
+dtmRemoved
+
+sparseRemoved = removeSparseTerms(dtmRemoved, 0.997)
+sparseRemoved
+wordsRemoved = as.data.frame(as.matrix(sparseRemoved))
+colnames(wordsRemoved) = paste("R", colnames(wordsRemoved))
+```
+
+```{r}
+#1.5
+wikiWords = cbind(wordsAdded, wordsRemoved)
+wikiWords$Vandal = wiki$Vandal
+
+library(caTools)
+set.seed(123)
+split = sample.split(wikiWords$Vandal, SplitRatio = 0.7)
+wikiTrain = subset(wikiWords, split == TRUE)
+wikiTest = subset(wikiWords, split == FALSE)
+
+table(wikiTest$Vandal)
+618/(618+545)
+```
+
+```{r}
+#1.6
+library(rpart)
+library(rpart.plot)
+wikiCART = rpart(Vandal ~ ., data = wikiTrain, method="class")
+prp(wikiCART)
+
+predictwikiCART = predict(wikiCART, newdata = wikiTest, type="class")
+table(wikiTest$Vandal, predictwikiCART)
+
+(614+19)/nrow(wikiTest)
+```
+
+```{r}
+#2.1
+wikiWords2 = wikiWords
+wikiWords2$HTTP = ifelse(grepl("http", wiki$Added, fixed=TRUE), 1, 0)
+table(wikiWords2$HTTP)
+```
+
+```{r}
+#2.2
+wikiTrain2 = subset(wikiWords2, split == TRUE)
+wikiTest2 = subset(wikiWords2, split == FALSE)
+
+wikiCART2 = rpart(Vandal ~ ., data = wikiTrain2, method = "class")
+testpredictCART2 = predict(wikiCART2, newdata = wikiTest2, type="class")
+table(wikiTest2$Vandal, testpredictCART2)
+(605+64)/nrow(wikiTest2)
+```
+
+```{r}
+#2.3
+wikiWords2$NumWordsAdded = rowSums(as.matrix(dtmAdded))
+wikiWords2$NumWordsRemoved = rowSums(as.matrix(dtmRemoved))
+mean(wikiWords2$NumWordsAdded)
+```
+
+```{r}
+#2.4
+wikiTrain3 = subset(wikiWords2, split == TRUE)
+wikiTest3 = subset(wikiWords2, split == FALSE)
+
+wikiCART3 = rpart(Vandal ~ ., data = wikiTrain3, method = "class")
+testpredictCART3 = predict(wikiCART3, newdata = wikiTest3, type="class")
+table(wikiTest3$Vandal, testpredictCART3)
+(514+248)/nrow(wikiTest3)
+```
+
+
+
+
+```{r}
+#3.1
+wikiWords3 = wikiWords2
+wikiWords3$Minor = wiki$Minor
+wikiWords3$Loggedin = wiki$Loggedin
+
+wikiTrain4 = subset(wikiWords3, split == TRUE)
+wikiTest4 = subset(wikiWords3, split == FALSE)
+wikiCART4 = rpart(Vandal ~ ., data = wikiTrain4, method = "class")
+testpredictCART4 = predict(wikiCART4, newdata = wikiTest4, type="class")
+table(wikiTest4$Vandal, testpredictCART4)
+(595+241)/nrow(wikiTest4)
+```
+
+```{r}
+#3.2
+prp(wikiCART4)
+```
+

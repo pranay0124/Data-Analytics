@@ -1,0 +1,86 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+# QUESTION 1.1
+library(caTools)
+letters = read.csv("letters_ABPR.csv")
+letters$isB = as.factor(letters$letter == "B")
+set.seed(1000)
+spl = sample.split(letters$isB, SplitRatio = 0.5)
+train = subset(letters, spl == TRUE)
+test = subset(letters, spl == FALSE)
+table(test$isB)
+1175/(1175+383)
+```
+
+```{r}
+# QUESTION 1.2
+
+CARTb = rpart(isB ~ . - letter, data=train, method="class")
+predictions = predict(CARTb, newdata=test, type="class")
+table(test$isB, predictions)
+(1118+340)/nrow(test)
+```
+
+```{r}
+# QUESTION 1.3
+
+set.seed(1000)
+RFb = randomForest(isB ~ . - letter, data=train)
+predictions = predict(RFb, newdata=test)
+table(test$isB, predictions)
+(1165+374)/nrow(test) 
+```
+
+
+```{r}
+# QUESTION 2.1
+
+set.seed(2000)
+spl = sample.split(letters$letter, SplitRatio = 0.5)
+train2 = subset(letters, spl == TRUE)
+test2 = subset(letters, spl == FALSE)
+table(test2$letter)
+401/nrow(test) 
+```
+
+
+```{r}
+# QUESTION 2.2
+
+CARTletter = rpart(letter ~ . - isB, data=train2, method="class")
+predictLetter = predict(CARTletter, newdata=test2, type="class")
+confusionMatrix = table(test2$letter, predictLetter)
+confusionMatrix
+(348+318+363+340)/nrow(test2) 
+```
+
+
+```{r}
+# QUESTION 2.3 
+
+set.seed(1000)
+RFletter = randomForest(letter ~ . - isB, data=train2)
+predictLetter = predict(RFletter, newdata=test2)
+table(test2$letter, predictLetter)
+(390+380 +393+364)/nrow(test2) 
+```

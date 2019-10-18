@@ -1,0 +1,54 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+#1
+climate = read.csv("climate_change.csv")
+str(climate)
+table(climate$Year)
+```
+
+```{r}
+#2
+library(ggplot2)
+scatterplot = ggplot(climate, aes(x = N2O, y = Temp)) + geom_line() + xlab("Concentration of N2O") + ylab("Temperature")
+scatterplot
+```
+
+```{r}
+#3
+llmodel = lm(Temp ~ Aerosols, data = climate)
+ggplot(climate, aes(x = Temp, y = Aerosols)) + geom_line() + stat_smooth(method = "lm")
+```
+
+```{r}
+#4
+intl = read.csv("intl.csv")
+str(intl)
+ggplot(intl, aes(x = Region, y = PercentOfIntl)) + geom_bar(stat = "identity", fill = "red") + ylab("International Students Percentage") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+#5
+y = c("Region1","Region2","Region3","Region4","Region5","Region6","Region7","Region8")
+pie(as.numeric(intl$Region), y)
+```
+

@@ -1,0 +1,151 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+# QUESTION 1.1
+
+census = read.csv("census.csv")
+library(caTools)
+set.seed(2000)
+spl = sample.split(census$over50k, SplitRatio = 0.6)
+train = subset(census, spl==TRUE)
+test = subset(census, spl==FALSE)
+censusglm = glm( over50k ~ . , family="binomial", data = train)
+summary(censusglm)
+```
+
+
+```{r}
+# QUESTION 1.2
+
+predictTest = predict(censusglm, newdata = test, type = "response")
+table(test$over50k, predictTest >= 0.5)
+
+# If we divide the sum of the main diagonal by the sum of all of the entries in the matrix, we obtain the accuracy:
+
+(9051+1888)/(9051+662+1190+1888)
+```
+
+
+```{r}
+# QUESTION 1.3
+
+table(test$over50k)
+9713/(9713+3078)
+```
+
+
+```{r}
+# QUESTION 1.4
+
+library(ROCR)
+ROCRpred = prediction(predictTest, test$over50k)
+as.numeric(performance(ROCpred, "auc")@y.values)
+```
+
+
+```{r}
+# QUESTION 2.1, 2.2, 2.3
+
+library(rpart)
+library(rpart.plot)
+censustree = rpart( over50k ~ . , method="class", data = train)
+prp(censustree)
+```
+
+
+```{r}
+# QUESTION 2.4
+
+predictTest = predict(censustree, newdata = test, type = "class")
+table(test$over50k, predictTest)
+
+# To compute the accuracy, sum the diagonal entries and divide by the sum of all of the terms:
+
+(9243+1596)/(9243+470+1482+1596)
+```
+
+
+```{r}
+# QUESTION 2.6
+
+library(ROCR)
+predictTest = predict(censustree, newdata = test)
+predictTest = predictTest[,2]
+
+ # Compute the AUC:
+
+ROCRpred = prediction(predictTest, test$over50k)
+as.numeric(performance(ROCRpred, "auc")@y.values)
+```
+
+```{r}
+# QUESTION 3.1
+
+set.seed(1)
+censusrf = randomForest(over50k ~ . , data = trainSmall)
+predictTest = predict(censusrf, newdata=test)
+table(test$over50k, predictTest)
+(9614+1050)/nrow(test)
+```
+
+
+```{r}
+# QUESTION 3.2
+
+vu = varUsed(MODEL, count=TRUE)
+
+vusorted = sort(vu, decreasing = FALSE, index.return = TRUE)
+
+dotchart(vusorted$x, names(MODEL$forest$xlevels[vusorted$ix]))
+```
+
+
+```{r}
+# QUESTION 3.3
+
+varImpPlot(MODEL)
+```
+
+
+```{r}
+# QUESTION 4.1
+library(caret)
+set.seed(2)
+fitControl = trainControl( method = "cv", number = 10 )
+cartGrid = expand.grid( .cp = seq(0.002,0.1,0.002))
+train( over50k ~ . , data = train, method = "rpart", trControl = fitControl, tuneGrid = cartGrid )
+```
+
+
+```{r}
+# QUESTION 4.2
+
+model = rpart(over50k~., data=train, method="class", cp=0.002)
+predictTest = predict(model, newdata=test, type="class")
+table(test$over50k, predictTest)
+(9178+1838)/(9178+535+1240+1838) 
+```
+
+
+```{r}
+# QUESTION 4.3
+
+prp(model)
+```

@@ -1,0 +1,81 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+#1
+movies = read.table("Movies.txt", header = FALSE, sep = "|", quote = "\"")
+colnames(movies) = c("ID","Title","ReleaseDate","VideoReleaseDate","IMDB","Unknown","Action","Adventure","Animation","Childrens","Comedy","Crime","Documentary","Drama","Fantasy","FilmNoir","Horror","Musical","Mystery","Romance","SciFi","Thriller","War","Western")
+str(movies)
+movies$ID = NULL
+movies$Title = NULL
+movies$ReleaseDate = NULL
+movies$VideoReleaseDate = NULL
+table(movies$Action == 1, movies$Horror == 1)
+```
+
+```{r}
+#2
+distances = dist(movies[2:20], method = "euclidean")
+cluster1 = hclust(distances, method = "ward")
+plot(cluster1)
+abline(h=150, col='red')
+```
+
+```{r}
+#3
+cluster1Group = cutree(cluster1, k=7)
+table(cluster1Group)
+
+```
+
+```{r}
+#4
+table(movies$Adventure, cluster1Group == 1)
+```
+
+```{r}
+#5
+table(movies$Childrens, cluster1Group)
+```
+
+```{r}
+#6
+table(movies$Fantasy, cluster1Group)
+```
+
+```{r}
+#7
+k = 7
+set.seed(1000)
+KMC = kmeans(movies[2:20], k)
+str(KMC)
+```
+
+```{r}
+table(KMC$cluster == 6)
+table(KMC$cluster == 4)
+table(KMC$cluster == 3)
+```
+
+```{r}
+table(KMC$cluster, KMC$centers == "Action")
+```
+

@@ -1,0 +1,154 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+CPS = read.csv("CPSData.csv")
+MetroAreaMap = read.csv("MetroAreaCodes.csv")
+CountryMap = read.csv("CountryCodes.csv")
+```
+
+```{r}
+#1
+summary(CPS)
+str(CPS)
+```
+
+```{r}
+#3
+which.min(sort(table(CPS$State)))
+```
+
+```{r}
+#4
+which.max(sort(table(CPS$State)))
+```
+
+```{r}
+#5
+1-(nrow(subset(CPS, CPS$Citizenship == "Non-Citizen")) / nrow(CPS))
+```
+
+```{r}
+#6
+table(CPS$Race, CPS$Hispanic)
+```
+
+```{r}
+#7
+summary(CPS)
+```
+
+```{r}
+#8
+table(CPS$Region , is.na(CPS$Married))
+table(CPS$Sex , is.na(CPS$Married))
+table(CPS$Age , is.na(CPS$Married))
+table(CPS$Citizenship , is.na(CPS$Married))
+```
+
+```{r}
+#9
+table(CPS$State, is.na(CPS$MetroAreaCode))
+```
+
+```{r}
+#11
+table(CPS$Region, is.na(CPS$MetroAreaCode))
+```
+
+```{r}
+#12
+tapply(is.na(CPS$MetroAreaCode), CPS$State, mean)
+sort(tapply(is.na(CPS$MetroAreaCode), CPS$State, mean))
+```
+
+```{r}
+#14
+str(MetroAreaMap)
+```
+
+```{r}
+#15
+str(CountryMap)
+```
+
+```{r}
+#16
+CPS = merge(CPS, MetroAreaMap, by.x="MetroAreaCode", by.y="Code", all.x=TRUE)
+str(CPS)
+```
+
+```{r}
+#18
+sort(table(CPS$MetroArea))
+```
+
+```{r}
+#19
+sort(tapply(CPS$Hispanic, CPS$MetroArea, mean))
+```
+
+```{r}
+#20
+sort(tapply(CPS$Race == "Asian", CPS$MetroArea, mean))
+```
+
+```{r}
+#21
+sort(tapply(CPS$Education == "No high school diploma", CPS$MetroArea, mean, na.rm = TRUE))
+```
+
+```{r}
+#22
+CPS = merge(CPS, CountryMap, by.x="CountryOfBirthCode", by.y="Code", all.x=TRUE)
+str(CPS)
+```
+
+```{r}
+#23
+summary(CPS)
+```
+
+```{r}
+#24
+sort(table(CPS$Country))
+```
+
+```{r}
+#25
+table(CPS$MetroArea == "New York-Northern New Jersey-Long Island, NY-NJ-PA", CPS$Country != "United States")
+```
+
+```{r}
+#26
+sort(tapply(CPS$Country == "India", CPS$MetroArea, sum, na.rm=TRUE))
+```
+
+```{r}
+#27
+sort(tapply(CPS$Country == "Brazil", CPS$MetroArea, sum, na.rm=TRUE))
+```
+
+```{r}
+#28
+sort(tapply(CPS$Country == "Somalia", CPS$MetroArea, sum, na.rm=TRUE))
+```
+

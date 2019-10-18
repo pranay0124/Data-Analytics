@@ -1,0 +1,53 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+airlines = read.csv("AirlinesCluster.csv")
+
+#1.1:
+summary(airlines)
+
+#1.3:
+install.packages("caret")
+library(caret)
+preproc = preProcess(airlines)
+airlinesNorm = predict(preproc, airlines)
+summary(airlinesNorm)
+```
+
+
+```{r}
+#2.1:
+airlinesDist = dist(airlinesNorm, method = "euclidean")
+airlinesclust = hclust(airlinesDist, method = "ward.D")
+plot(airlinesclust)
+
+#2.2:
+airline = cutree(airlinesclust, k=5)
+table(airline)
+
+#2.3:
+lapply(split(airlines, airline), colMeans)
+
+#2.4:
+set.seed(88)
+kmeansclust = kmeans(airlinesNorm, centers=5, iter.max=1000)
+table(kmeansclust$cluster)
+```
+

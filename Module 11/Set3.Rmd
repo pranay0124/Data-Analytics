@@ -1,0 +1,79 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+#1
+energy = read.csv("energy_readings.csv", stringsAsFactors = FALSE)
+str(energy)
+table(energy$responsive)
+```
+
+```{r}
+#2
+library(tm)
+library(SnowballC)
+library(rpart)
+corpus = Corpus(VectorSource(energy$email))
+corpus = tm_map(corpus,tolower)
+corpus = tm_map(corpus,removePunctuation)
+corpus = tm_map(corpus,removeWords, stopwords("english"))
+corpus = tm_map(corpus,stemDocument)
+
+dtm = DocumentTermMatrix(corpus)
+sparse = removeSparseTerms(dtm, 0.95)
+sparseDF = as.data.frame(as.matrix(sparse))
+sparseDF$responsive = energy$responsive
+
+set.seed(1500)
+splitSparse = sample.split(sparseDF$responsive, SplitRatio = 0.75)
+sparseDFTrain = subset(sparseDF, splitSparse == TRUE)
+sparseDFTest = subset(sparseDF, splitSparse == FALSE)
+
+sparseCART = rpart(responsive ~., data, data = sparseDFTrain, method = "class")
+predictSparseCART = predict(sparseCART, newdata = sparseDFTest, type = "class")
+
+```
+
+```{r}
+#3
+table(sparseDFTest$responsive, as.numeric(predictSparseCART) > 0.5)
+table(sparseDFTest$responsive, as.numeric(predictSparseCART) > 0.7)
+table(sparseDFTest$responsive, as.numeric(predictSparseCART) > 0.9)
+```
+
+
+```{r}
+#4
+table(sparseDFTest$responsive, as.numeric(predictSparseCART) > 0.6)
+179/(179+35)
+table(sparseDFTest$responsive, as.numeric(predictSparseCART) > 0.8)
+179/(179+35)
+```
+
+```{r}
+#5
+library(ROCR)
+ROCRsparse = prediction(as.numeric(predictSparseCART), sparseDFTest$responsive)
+ROCRgraph = performance(ROCRsparse, "tpr", "fpr")
+plot(ROCRgraph)
+as.numeric(performance(ROCRsparse,"auc")@y.values)
+```
+

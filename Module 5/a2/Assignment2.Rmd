@@ -1,0 +1,87 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+
+```{r}
+#1
+machine = read.csv("machine.csv")
+model1 = lm(PRP ~ X+MYCT+MMIN+MMAX+CACH+CHMIN+CHMAX, data = machine)
+```
+
+```{r}
+#2
+summary(model1)
+#answer = MYCT, MMIN, MMAX, CACH, CHMAX
+```
+
+```{r}
+#3
+machine2 = subset(machine, select=-c(VendorName, ModelName, ERP, PRP))
+cor(machine2)
+
+#answer = MMAX is highly corelated with MMIN (0.75782678)
+```
+
+```{r}
+#4
+machine3 = subset(machine, select=-c(VendorName, ModelName, ERP))
+cor(machine3)
+
+#answer = PRP is highly corelated with MMAX (0.86557615)
+```
+
+```{r}
+#5
+# X, MYCT has the correlation between -0.4 to 0.4
+model2 = lm(PRP ~ X+MYCT+MMAX, data = machine)
+```
+
+```{r}
+#6
+summary(model2)
+#answer = 0.7503
+```
+
+```{r}
+#7
+stepModel = step(model2)
+summary(stepModel)
+#answer = 0.7492
+```
+
+```{r}
+#8
+library(caTools)
+set.seed(6)
+split = sample.split(machine$PRP, SplitRatio = 0.75)
+trainSet = subset(machine, split == TRUE)
+testSet = subset(machine, split == FALSE)
+
+machineLog = lm(PRP ~ X+MYCT+MMIN+MMAX+CACH+CHMIN+CHMAX, data = trainSet)
+machineStep = step(machineLog)
+predictTest = predict(machineStep, newDate = testSet)
+
+SSE = sum((testSet$PRP - predictTest)^2)
+SST = sum((testSet$PRP - mean(trainSet$PRP))^2)
+R = 1 - (SSE/SST)
+#answer = 0.8158839
+```
+

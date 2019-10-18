@@ -1,0 +1,80 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+mvt$Month = months(DateConvert)
+mvt$Weekday = weekdays(DateConvert)
+mvt$Date = DateConvert
+```
+
+
+```{r}
+#1
+hist(mvt$Date, breaks = 100)
+```
+
+```{r}
+#4
+boxplot(mvt$Date ~ mvt$Arrest)
+```
+
+```{r}
+#5
+table(mvt$Arrest, mvt$Year == 2001)
+2152/(18517+2152)
+```
+
+```{r}
+#6
+table(mvt$Arrest, mvt$Year == 2007)
+1212/(13068+1212)
+```
+
+```{r}
+#7
+table(mvt$Arrest, mvt$Year == 2012)
+550/(13542+550)
+```
+
+```{r}
+#8
+sort(table(mvt$LocationDescription)) 
+```
+
+```{r}
+#9
+Top5 = subset(mvt, mvt$LocationDescription == "STREET" | 
+                    mvt$LocationDescription == "PARKING LOT/GARAGE(NON.RESID.)" |
+                    mvt$LocationDescription == "ALLEY" |
+                    mvt$LocationDescription == "GAS STATION" |
+                    mvt$LocationDescription == "DRIVEWAY - RESIDENTIAL")
+Top5$LocationDescription = factor(Top5$LocationDescription)         
+
+gasStation = subset(Top5, Top5$LocationDescription == "GAS STATION")
+which.max(table(gasStation$Weekday))
+```
+
+```{r}
+#10
+resDri <- subset(Top5, Top5$LocationDescription=="DRIVEWAY - RESIDENTIAL")
+which.min(table(resDri$Weekday))
+```
+

@@ -1,0 +1,57 @@
+---
+title: "R Notebook"
+output: html_notebook
+editor_options: 
+  chunk_output_type: console
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+plot(cars)
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+```{r}
+#1
+cc = read.csv("climate_change.csv")
+trainingSet = subset(cc, cc$Year <= 2006)
+testingSet = subset(cc, cc$Year > 2006)
+
+model1 = lm(Temp ~ MEI+CO2+CH4+N2O+CFC.11+CFC.12+TSI+Aerosols, data = trainingSet)
+summary(model1)
+```
+
+```{r}
+#4
+cor(trainingSet)
+```
+
+```{r}
+#6
+model2 = lm(Temp ~ MEI+TSI+Aerosols+N2O, data = trainingSet)
+summary(model2)
+```
+
+```{r}
+#8
+model1_new = step(model1)
+summary(model1_new)
+```
+
+```{r}
+#10
+predictTest = predict(model1_new, newdata = testingSet)
+SSE = sum((predictTest - testingSet$Temp)^2)
+SST = sum((mean(trainingSet$Temp) - testingSet$Temp)^2)
+R2 = 1 - SSE/SST
+R2
+```
+
